@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maharvihara Monastery</title>
+    <style>
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: black;
+        }
+        .typing-container {
+            font-size: 2em;
+            font-family: monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 0.15em solid white;
+            width: fit-content; /* Adjust based on the length of the text */
+            animation: blink-caret 0.75s step-end infinite;
+            color: blue;
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: white; }
+        }
+    </style>
+</head>
+<body class="container">
+    <div class="typing-container" id="typing-text"></div>
+
+    <script>
+        const text = "Hello, boss. You hit the endpoint successfully! Congratulations (:";
+        let cursor = "<span class='cursor'>|</span>";
+        let index = 0;
+        let isDeleting = false;
+        const typingSpeed = 200;
+        const deletingSpeed = 100;
+        const pause = 1000;
+
+        function type() {
+            const typingText = document.getElementById('typing-text');
+            if (isDeleting) {
+                typingText.textContent = text.substring(0, index--);
+                if (index < 0) {
+                    isDeleting = false;
+                    setTimeout(type, pause);
+                } else {
+                    setTimeout(type, deletingSpeed);
+                }
+            } else {
+                typingText.textContent = text.substring(0, index++);
+                if (index > text.length) {
+                    isDeleting = true;
+                    setTimeout(type, pause);
+                } else {
+                    setTimeout(type, typingSpeed);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(type, typingSpeed);
+        });
+    </script>
+</body>
+</html>

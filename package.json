@@ -1,0 +1,32 @@
+{
+  "name": "maharvihara-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "express-session": "^1.18.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.11.3",
+    "php-serialize": "^5.0.1",
+    "sequelize": "^6.37.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "nodemon": "^3.1.7"
+  }
+}
