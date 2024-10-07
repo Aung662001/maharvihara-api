@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors"
 import session from "express-session"
 import LoginRoute from "./routes/LoginRoute.js"
+import ProductRoute from "./routes/ProductRoute.js"
 
 const app = express();
 const port = 3000;
@@ -34,6 +35,7 @@ app.post("/setfilters", async (req, res) => {
 });
 
 app.use("/login",LoginRoute);
+app.use("/products",ProductRoute)
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

@@ -27,7 +27,6 @@ router.get("/",async (req,res) =>{
             if (result) {
               user.permission="";
               user.password= "";
-              console.log(user,"user")
               let token =await getAccessToken(user);
               //set filter session
               let today = dayjs(new Date()).format("YYYY-MM-DD")

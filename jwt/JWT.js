@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
+import { secretKey } from "../auth/VerifyJwt.js";
 
-let secretKey = "maharviharabhonebhone"
 const getAccessToken = async (user) =>{
     let token = jwt.sign(
         {
