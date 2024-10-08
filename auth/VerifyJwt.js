@@ -10,12 +10,13 @@ export default function verifyJwtToken(req, res, next) {
     const accessToken = header.split(" ")[1];
     if (accessToken == null) return res.sendStatus(403);
     const decoded = jwt.verify(accessToken, secretKey, {
-      expiresIn: "1d",
     });
     if (!decoded) {
       console.log("jwt verification failed");
       return res.sendStatus(403);
     }
+    // @ts-ignore
+    req.user = decoded.data ;
     next();
   } catch (err) {
     console.log("jwt verification failed in catch block", err.message);

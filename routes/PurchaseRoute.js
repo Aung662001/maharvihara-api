@@ -3,7 +3,7 @@ const router = express.Router();
 import {
   getAccountData,
   getCashBankAccountData,
-} from "../quries/AccountGroupQuery.js";
+} from "../quries/AccountQuery.js";
 import { ErrorResponse } from "../helper/ErrorResponse.js";
 import verifyJwtToken from "../auth/VerifyJwt.js";
 import { fexecsql } from "../helper/QueryHelper.js";
@@ -25,7 +25,7 @@ import {
 router.get("/fetchNewPurchaseVoucherData", verifyJwtToken, async (req, res) => {
   // to create new purchase
   try {
-    let user = req.session.user;
+    let user = req.user;
     let data = {};
     let account_group_id = await fexecsql(`SELECT max(account_group_id) return1 
 												FROM system_accountgroups WHERE name='PURCHASE'`);
@@ -59,8 +59,8 @@ router.get("/fetchNewPurchaseVoucherData", verifyJwtToken, async (req, res) => {
 
 router.get("/fetchPurchaseData", verifyJwtToken, async (req, res) => {
   try {
-    let filter = req.query.filter;
-    let user = req.user;
+    let filter = req.session.filter;
+    let user = req.session.user;
     let data = await getPurchaseData(filter, user);
     res.status(200).json({ vouchers: data });
   } catch (err) {

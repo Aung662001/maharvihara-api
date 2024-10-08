@@ -180,7 +180,7 @@ export const getProductDataByName = async (name, user, limit = null) => {
     if (limit) {
       limitfilter += `limit ${limit}`;
     }
-    sql = `SELECT his.id,his.code,his.name,his.sale_price,his.sale_price2,his.sale_price3,
+    sql = `SELECT his.id,his.code,his.name,his.purchase_price,his.sale_price,his.sale_price2,his.sale_price3,
 				his.sale_price4,sum(ifnull(s.qty,0)) bal FROM products his LEFT JOIN stockbalanceviews s
 				ON his.id=s.product_id ${filter} ${locfilter} GROUP BY his.code,his.name ${limitfilter}`;
     let result = await db.query(sql, {

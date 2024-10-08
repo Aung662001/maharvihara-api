@@ -39,7 +39,6 @@ router.get("/fetchCategoryName", async (req, res) => {
 });
 
 router.get("/fetchProductData", verifyJwtToken, async (req, res) => {
-  console.log("reached");
   try {
     let user = req.user;
     let category_id = req.query.category_id;
@@ -109,11 +108,8 @@ router.get("/fetchProductDataByCode", async (req, res) => {
 router.get("/fetchProductDataByName", verifyJwtToken, async (req, res) => {
   try {
     let name = req.query.name;
-    let user = req.session.user;
-    let result = "";
-    console.log(name,"name")
-    console.log(user,"user")
-    // let result = await getProductDataByName(name, user, 10);
+    let user = req.user;
+    let result = await getProductDataByName(name, user, 10);
     res.status(200).json({ products: result });
   } catch (err) {
     console.log(err);
