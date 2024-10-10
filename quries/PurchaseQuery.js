@@ -11,7 +11,7 @@ export const getPurchaseData = async (filter, user, id = null) => {
   }
 
   let fromdate = filter.fromdate;
-  let todate = filter.todate;
+  let todate = filter.todate; 
 
   let user_type = user.user_type;
   let query_filter = "";
@@ -212,7 +212,7 @@ let insertIntoPurchase = async (data, user, transaction, voucher_no) => {
       cashbook_id: data.cashbook.id,
       voucher_date: data.date,
       due_date: data.duedate,
-      pay_type:  1, //cash down
+      pay_type: 1, //cash down
       total_qty: data.totalqty,
       total_weight: data.totalweight ? data.totalweight : 0,
       total_amount: data.totalamount,
@@ -236,8 +236,11 @@ let insertIntoPurchaseDetails = async (
   purchase_id,
   index
 ) => {
-  let product_id = data.tableBody[index].id;
-  let unit_type = (data.tableBody[index]["unit"] && data.tableBody[index]["unit"].unit_type) ? data.tableBody[index]["unit"].unit_type:1;
+  let product_id = data.tableBody[index].product_id;
+  let unit_type =
+    data.tableBody[index]["unit"] && data.tableBody[index]["unit"].unit_type
+      ? data.tableBody[index]["unit"].unit_type
+      : 1;
   let price = data.tableBody[index].price;
   let sql = `insert into purchase_details (purchase_id,account_id,product_id,date,stock_location_id,qty,
     weight,smallest_qty,unit_type,currency_id,exchange_rate,cost1,cost2,cost3,cost4,cost5,price,amount,received)
@@ -246,7 +249,7 @@ let insertIntoPurchaseDetails = async (
   let result = await db.query(sql, {
     type: QueryTypes.INSERT,
     bind: {
-      purchase_id,  
+      purchase_id,
       account_id: data.account.id,
       product_id: product_id,
       date: data.date,
@@ -280,7 +283,9 @@ let insertIntoPurchaseDetails = async (
   return result[0];
 };
 let managePriceWithUnit = async (data, transaction, index) => {
-  let unit_type = data.tableBody[index]["unit"].unit_type ? data.tableBody[index]["unit"].unit_type:1;
+  let unit_type = data.tableBody[index]["unit"].unit_type
+    ? data.tableBody[index]["unit"].unit_type
+    : 1;
   let price = data.tableBody[index].price;
   let product_id = data.tableBody[index].id;
   if (unit_type == 1) {
@@ -381,7 +386,7 @@ let generalLedger = async (
       { type: QueryTypes.DELETE }
     );
     let pay_type = 1;
-    let merchant_id = data.suppiler.id? data.suppiler.id :0;
+    let merchant_id = data.suppiler.id ? data.suppiler.id : 0;
     let cashbook_id = data.cashbook.id ? data.cashbook.id : 5;
     let branch_id = data.branch.id ? data.branch.id : 1;
     let user_id = user.user_id;
@@ -543,7 +548,7 @@ let updatePurchase = async (data, user, transaction, id) => {
       total_amount: data.totalamount,
       discount: data.discount,
       tax: data.tax ? data.tax : 0,
-      expense:  data.expense ? data.expense : 0,
+      expense: data.expense ? data.expense : 0,
       net_amount: data.netamount,
       remark: data.remark ? data.remark : "",
       user_id: user.user_id,
@@ -556,8 +561,11 @@ let updatePurchase = async (data, user, transaction, id) => {
   return result[0];
 };
 let updatePurchaseDetails = async (data, transaction, purchase_id, index) => {
-  let product_id = data.tableBody[index].id;
-  let unit_type = (data.tableBody[index]["unit"] && data.tableBody[index]["unit"].unit_type) ? data.tableBody[index]["unit"].unit_type:1;
+  let product_id = data.tableBody[index].product_id;
+  let unit_type =
+    data.tableBody[index]["unit"] && data.tableBody[index]["unit"].unit_type
+      ? data.tableBody[index]["unit"].unit_type
+      : 1;
   let price = data.tableBody[index].price;
 
   let sql = `insert into purchase_details (purchase_id,account_id,product_id,date,stock_location_id,qty,
@@ -574,9 +582,11 @@ let updatePurchaseDetails = async (data, transaction, purchase_id, index) => {
       stock_location_id: data.stocklocation.id,
       qty: data.tableBody[index].qty,
       weight: data.tableBody[index].weight ? data.tableBody[index].weight : 0,
-      smallest_qty: data.tableBody[index]["unit"].smallest_unit_qty
-        ? data.tableBody[index]["unit"].smallest_unit_qty
-        : 1,
+      smallest_qty:
+        data.tableBody[index]["unit"] &&
+        data.tableBody[index]["unit"].smallest_unit_qty
+          ? data.tableBody[index]["unit"].smallest_unit_qty
+          : 1,
       unit_type: unit_type,
       currency_id: 1,
       exchange_rate: 1,

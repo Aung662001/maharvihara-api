@@ -18,7 +18,6 @@ export const getCategoryName = async (parent_id) => {
     });
     return categories;
   } catch (error) {
-    console.log(error);
     throw new Error("Database Error");
   }
 };
@@ -28,7 +27,7 @@ export const getChildCategories = async (id) => {
   let ids = id + ",";
   ids += await get_node_data(id);
   ids = ids.slice(0, -1);
-  return ids;
+  return ids
 };
 const get_node_data = async (parent_id) => {
   let ids = "";
