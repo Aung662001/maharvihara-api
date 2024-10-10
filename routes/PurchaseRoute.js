@@ -73,6 +73,7 @@ router.post("/create", verifyJwtToken, async (req, res) => {
   try {
     let data = req.body;
     let user = req.user;
+    // res.status(200).json({message:"Purchase voucher created successfully!"})
     await create(data, user);
     res.status(200).json({ message: "Purchase voucher successfully saved" });
   } catch (err) {
@@ -84,7 +85,7 @@ router.get("/update", verifyJwtToken, async (req, res) => {
   try {
     let data = {};
     let user = req.user;
-    let filter = req.query.filter;
+    let filter = req.session.filter;
     let id = req.query.id;
 
     data["company_data"] = await getCompanyData(1);
@@ -103,8 +104,9 @@ router.get("/update", verifyJwtToken, async (req, res) => {
 router.post("/update", verifyJwtToken, async (req, res) => {
   try {
     let data = req.body;
-    let user = req.user;
+    let user = req.user; 
     let id = req.query.id;
+
     await update(data, user, id);
     res.status(200).json({ message: "Purchase voucher successfully updated" });
   } catch (err) {

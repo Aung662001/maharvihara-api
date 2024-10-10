@@ -77,9 +77,10 @@ export const getVoucherNo = async (type, user_id) => {
   await db.query(sql);
   let serial_no = await fexecsql(`SELECT serial_no return1 FROM voucher_numbers 
                     WHERE type='${type}' AND user_id=${user_id} `);
-  let voucher_digit = await fexecsql(
-    `SELECT admission_digit AS return1 FROM company`
-  );
+  // let voucher_digit = await fexecsql(
+  //   `SELECT admission_digit AS return1 FROM company`
+  // );
+  let voucher_digit = 5;
   while (voucher_digit > serial_no.toString().length) {
     serial_no = "0" + serial_no;
   }

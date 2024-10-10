@@ -153,10 +153,10 @@ export const create = async (data, user) => {
       transaction,
       voucher_no
     );
-    for (let index = 0; index < data.amount.length; index++) {
+    for (let index = 0; index < data.tableBody.length; index++) {
       await insertIntoPurchaseDetails(data, transaction, purchase_id, index);
       await managePriceWithUnit(data, transaction, index);
-      let product_id = data.unit[index].product_id;
+      let product_id = data.tableBody[index].id;
       let max_unit_type = await fexecsql(`SELECT MIN(unit_type) return1 
         FROM  product_units WHERE product_id=${product_id} `);
       let max_unit_price = await fexecsql(`SELECT purchase_price AS return1 
@@ -168,9 +168,8 @@ export const create = async (data, user) => {
         { type: QueryTypes.UPDATE, transaction }
       );
     }
-
     await db.query(
-                          `UPDATE purchase_details his
+      `UPDATE purchase_details his
 				                  JOIN product_units p ON his.product_id = p.product_id
 				                  AND his.unit_type=p.unit_type
 				                  SET his.smallest_qty=his.qty * p.smallest_unit_qty
@@ -178,52 +177,53 @@ export const create = async (data, user) => {
       { type: QueryTypes.UPDATE, transaction }
     );
     await db.query(
-                          `UPDATE purchase_details his
+      `UPDATE purchase_details his
 				                  JOIN product_units p ON his.product_id = p.product_id
 				                  SET his.main_unit_price=p.purchase_price
 				                  WHERE p.unit_type=1 AND his.purchase_id=${purchase_id}`,
       { type: QueryTypes.UPDATE, transaction }
     );
-    await generalLedger(purchase_id, data, user, transaction,voucher_no);
+    await generalLedger(purchase_id, data, user, transaction, voucher_no);
     await transaction.commit();
   } catch (error) {
-    console.log(error)
+    console.log(error);
     transaction && (await transaction.rollback());
     throw new CustomError("Database error", 500);
   }
 };
 let insertIntoPurchase = async (data, user, transaction, voucher_no) => {
-  data.branch_id = data.branch.id;
-  data.stock_location_id = data.location.id;
-  data.merchant_id = data.suppiler.id;
-  data.cashbook_id = data.cashbook.id;
+  // data.branch_id = data.branch.id;
+  // data.stock_location_id = data.stocklocation.id;
+  // data.merchant_id = data.suppiler.id ? data.suppiler.id : 0;
+  // data.cashbook_id = data.cashbook.id;
   let sql = `insert into purchases (voucher_no,branch_id,stock_location_id,merchant_id,previous_credit,
    cashbook_id,voucher_date,due_date,pay_type,total_qty,total_weight,total_amount,discount,tax,expense,
-   net_amount,remark,user_id,created_date,modified_date) values ($voucher_no,$branch_id,$stock_location_id,
+   net_amount,remark,user_id,created_date,account_id,modified_date) values ($voucher_no,$branch_id,$stock_location_id,
    $merchant_id,$previous_credit,$cashbook_id,$voucher_date,$due_date,$pay_type,$total_qty,$total_weight,
-   $total_amount,$discount,$tax,$expense,$net_amount,$remark,$user_id,$created_date,$modified_date)`;
+   $total_amount,$discount,$tax,$expense,$net_amount,$remark,$user_id,$created_date,$account_id,$modified_date)`;
   let result = await db.query(sql, {
     type: QueryTypes.INSERT,
-    bind: { 
+    bind: {
       voucher_no,
-      branch_id: data.branch.id,
-      stock_location_id: data.location.id,
-      merchant_id: data.suppiler.id,
-      previous_credit: data.previous_credit,
+      branch_id: data.branch.id ? data.branch.id : 0,
+      stock_location_id: data.stocklocation.id ? data.stocklocation.id : 0,
+      merchant_id: data.suppiler.id ? data.suppiler.id : 0,
+      previous_credit: data.previous_credit ? data.previous_credit : 0,
       cashbook_id: data.cashbook.id,
       voucher_date: data.date,
-      due_date: data.due_date,
-      pay_type: data.payment_type.id,
-      total_qty: data.total_qty,
-      total_weight: data.total_weight,
-      total_amount: data.total,
+      due_date: data.duedate,
+      pay_type:  1, //cash down
+      total_qty: data.totalqty,
+      total_weight: data.totalweight ? data.totalweight : 0,
+      total_amount: data.totalamount,
       discount: data.discount,
-      tax: data.tax,
-      expense: data.expense,
-      net_amount: data.net_amount,
-      remark: data.remark,
+      tax: data.tax ? data.tax : 0,
+      expense: data.expense ? data.expense : 0,
+      net_amount: data.netamount,
+      remark: data.remark ? data.remark : "",
       user_id: user.user_id,
       created_date: new Date(),
+      account_id: data.account.id,
       modified_date: new Date(),
     },
     transaction,
@@ -236,9 +236,9 @@ let insertIntoPurchaseDetails = async (
   purchase_id,
   index
 ) => {
-  let product_id = data.unit[index].product_id;
-  let unit_type = data.unit[index].unit_type;
-  let price = data.unit[index].purchase_price;
+  let product_id = data.tableBody[index].id;
+  let unit_type = (data.tableBody[index]["unit"] && data.tableBody[index]["unit"].unit_type) ? data.tableBody[index]["unit"].unit_type:1;
+  let price = data.tableBody[index].price;
   let sql = `insert into purchase_details (purchase_id,account_id,product_id,date,stock_location_id,qty,
     weight,smallest_qty,unit_type,currency_id,exchange_rate,cost1,cost2,cost3,cost4,cost5,price,amount,received)
      values ($purchase_id,$account_id,$product_id,$date,$stock_location_id,$qty,$weight,$smallest_qty,
@@ -246,25 +246,27 @@ let insertIntoPurchaseDetails = async (
   let result = await db.query(sql, {
     type: QueryTypes.INSERT,
     bind: {
-      purchase_id,
-      account_id: data.account[index].id,
+      purchase_id,  
+      account_id: data.account.id,
       product_id: product_id,
       date: data.date,
-      stock_location_id: data.location.id,
-      qty: data.qty[index],
-      weight: data.weight[index],
-      smallest_qty: data.unit[index].smallest_unit_qty,
-      unit_type: data.unit[index].unit_type,
-      currency_id: data.currency[index].id,
-      exchange_rate: data.exchange[index],
+      stock_location_id: data.stocklocation.id,
+      qty: data.tableBody[index].qty,
+      weight: data.tableBody[index].weight ? data.tableBody[index].weight : 0,
+      smallest_qty: data.tableBody[index]["unit"].smallest_unit_qty
+        ? data.tableBody[index]["unit"].smallest_unit_qty
+        : 1,
+      unit_type: unit_type,
+      currency_id: 1,
+      exchange_rate: 1,
       cost1: 0,
       cost2: 0,
       cost3: 0,
       cost4: 0,
       cost5: 0,
-      price: data.price[index],
-      amount: data.amount[index],
-      received: data.received[index].id,
+      price: price,
+      amount: data.tableBody[index].price * data.tableBody[index].qty,
+      received: 1,
     },
     transaction,
   });
@@ -278,9 +280,9 @@ let insertIntoPurchaseDetails = async (
   return result[0];
 };
 let managePriceWithUnit = async (data, transaction, index) => {
-  let unit_type = data.unit[index].unit_type;
-  let price = data.unit[index].purchase_price;
-  let product_id = data.unit[index].product_id;
+  let unit_type = data.tableBody[index]["unit"].unit_type ? data.tableBody[index]["unit"].unit_type:1;
+  let price = data.tableBody[index].price;
+  let product_id = data.tableBody[index].id;
   if (unit_type == 1) {
     let hastwo = await fexecsql(
       `SELECT COUNT(product_id) return1 FROM  product_units WHERE product_id=${product_id} AND unit_type=2`,
@@ -378,10 +380,10 @@ let generalLedger = async (
       `DELETE FROM general_ledger WHERE transaction_type='PURCHASE' AND transaction_id=${purchase_id}`,
       { type: QueryTypes.DELETE }
     );
-    let pay_type = data.payment_type.id;
-    let merchant_id = data.suppiler.id;
-    let cashbook_id = data.cashbook.id;
-    let branch_id = data.branch.id;
+    let pay_type = 1;
+    let merchant_id = data.suppiler.id? data.suppiler.id :0;
+    let cashbook_id = data.cashbook.id ? data.cashbook.id : 5;
+    let branch_id = data.branch.id ? data.branch.id : 1;
     let user_id = user.user_id;
     let remark2 = data.remark;
     let date = data.date;
@@ -483,11 +485,10 @@ export const update = async (data, user, id) => {
     }
     await updatePurchase(data, user, transaction, id);
     //delete old details
-    await db.query(
-      `delete from purchase_details where purchase_id =${id}`,
-      { type: QueryTypes.DELETE }
-    );
-    for (let index = 0; index < data.code.length; index++) {
+    await db.query(`delete from purchase_details where purchase_id =${id}`, {
+      type: QueryTypes.DELETE,
+    });
+    for (let index = 0; index < data.tableBody.length; index++) {
       await updatePurchaseDetails(data, transaction, id, index);
     }
     await generalLedger(id, data, user, transaction, data.voucher_number);
@@ -500,10 +501,10 @@ export const update = async (data, user, id) => {
   }
 };
 let updatePurchase = async (data, user, transaction, id) => {
-  data.branch_id = data.branch.id;
-  data.stock_location_id = data.location.id;
-  data.merchant_id = data.suppiler.id;
-  data.cashbook_id = data.cashbook.id;
+  // data.branch_id = data.branch.id;
+  // data.stock_location_id = data.stocklocation.id;
+  // data.merchant_id = data.suppiler.id;
+  // data.cashbook_id = data.cashbook.id;
   let sql = `update purchases set 
             voucher_no=$voucher_no,
             branch_id=$branch_id,
@@ -523,28 +524,30 @@ let updatePurchase = async (data, user, transaction, id) => {
             net_amount=$net_amount,
             remark=$remark,
             user_id=$user_id,
+            account_id=$account_id,
             modified_date=$modified_date where id = $id`;
   let result = await db.query(sql, {
     type: QueryTypes.UPDATE,
     bind: {
-      voucher_no: data.voucher_number,
-      branch_id: data.branch.id,
-      stock_location_id: data.location.id,
-      merchant_id: data.suppiler.id,
-      previous_credit: data.previous_credit,
+      voucher_no: data.vouchernumber,
+      branch_id: data.branch.id ? data.branch.id : 0,
+      stock_location_id: data.stocklocation.id ? data.stocklocation.id : 0,
+      merchant_id: data.suppiler.id ? data.suppiler.id : 0,
+      previous_credit: data.previous_credit ? data.previous_credit : 0,
       cashbook_id: data.cashbook.id,
       voucher_date: data.date,
-      due_date: data.due_date,
-      pay_type: data.payment_type.id,
-      total_qty: data.total_qty,
-      total_weight: data.total_weight,
-      total_amount: data.total,
+      due_date: data.duedate,
+      pay_type: 1,
+      total_qty: data.totalqty,
+      total_weight: data.totalweight ? data.totalweight : 0,
+      total_amount: data.totalamount,
       discount: data.discount,
-      tax: data.tax,
-      expense: data.expense,
-      net_amount: data.net_amount,
-      remark: data.remark,
+      tax: data.tax ? data.tax : 0,
+      expense:  data.expense ? data.expense : 0,
+      net_amount: data.netamount,
+      remark: data.remark ? data.remark : "",
       user_id: user.user_id,
+      account_id: data.account.id,
       modified_date: new Date(),
       id: id,
     },
@@ -553,10 +556,9 @@ let updatePurchase = async (data, user, transaction, id) => {
   return result[0];
 };
 let updatePurchaseDetails = async (data, transaction, purchase_id, index) => {
-  console.log(data.account[index])
-  let product_id = data.unit[index].product_id;
-  let unit_type = data.unit[index].unit_type;
-  let price = data.unit[index].purchase_price;
+  let product_id = data.tableBody[index].id;
+  let unit_type = (data.tableBody[index]["unit"] && data.tableBody[index]["unit"].unit_type) ? data.tableBody[index]["unit"].unit_type:1;
+  let price = data.tableBody[index].price;
 
   let sql = `insert into purchase_details (purchase_id,account_id,product_id,date,stock_location_id,qty,
     weight,smallest_qty,unit_type,currency_id,exchange_rate,cost1,cost2,cost3,cost4,cost5,price,amount,received)
@@ -566,24 +568,26 @@ let updatePurchaseDetails = async (data, transaction, purchase_id, index) => {
     type: QueryTypes.INSERT,
     bind: {
       purchase_id,
-      account_id: data.account[index].id,
+      account_id: data.account.id,
       product_id: product_id,
       date: data.date,
-      stock_location_id: data.location.id,
-      qty: data.qty[index],
-      weight: data.weight[index],
-      smallest_qty: data.unit[index].smallest_unit_qty,
-      unit_type: data.unit[index].unit_type,
-      currency_id: data.currency[index].id,
-      exchange_rate: data.exchange[index],
+      stock_location_id: data.stocklocation.id,
+      qty: data.tableBody[index].qty,
+      weight: data.tableBody[index].weight ? data.tableBody[index].weight : 0,
+      smallest_qty: data.tableBody[index]["unit"].smallest_unit_qty
+        ? data.tableBody[index]["unit"].smallest_unit_qty
+        : 1,
+      unit_type: unit_type,
+      currency_id: 1,
+      exchange_rate: 1,
       cost1: 0,
       cost2: 0,
       cost3: 0,
       cost4: 0,
       cost5: 0,
-      price: data.price[index],
-      amount: data.amount[index],
-      received: data.received[index].id,
+      price: price,
+      amount: data.tableBody[index].price * data.tableBody[index].qty,
+      received: 1,
     },
     transaction,
   });
@@ -607,14 +611,14 @@ export const remove = async (id) => {
   let transaction = await db.transaction();
   try {
     let sql = `delete from purchase where id = $id`;
-    await makeRemove(sql,id,transaction);
+    await makeRemove(sql, id, transaction);
 
     sql = `delete from purchase_details where purchase_id = $id`;
-    await makeRemove(sql,id,transaction);
+    await makeRemove(sql, id, transaction);
 
     sql = `delete from general_ledger where transaction_id = $id and (transaction_type='PURCHASE' 
           or transaction_type='SPAY')`;
-    await makeRemove(sql,id,transaction);
+    await makeRemove(sql, id, transaction);
     await transaction.commit();
     return true;
   } catch (error) {
@@ -623,10 +627,10 @@ export const remove = async (id) => {
     throw new CustomError("Database error", 500);
   }
 };
-let makeRemove = async (sql,id,transaction) =>{
+let makeRemove = async (sql, id, transaction) => {
   await db.query(sql, {
     type: QueryTypes.DELETE,
     bind: { id },
     transaction,
   });
-}
+};
