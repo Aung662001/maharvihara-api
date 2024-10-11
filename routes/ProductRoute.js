@@ -55,13 +55,7 @@ router.get("/fetchProductData", verifyJwtToken, async (req, res) => {
 router.post("/create", verifyJwtToken, async (req, res) => {
   try {
     let data = req.body;
-    let productData = {
-      ...data,
-      category_id: data.category.id,
-      availability: data.status.id,
-    };
-    let unitData = { unit_qty: 1, unit_type: 1, ...data };
-    let result = await create(productData, unitData);
+    let result = await create(data);
     res
       .status(200)
       .json({ success: true, message: "Product created successfully" });

@@ -21,7 +21,6 @@ export const getCategoryName = async (parent_id) => {
     throw new Error("Database Error");
   }
 };
-
 export const getChildCategories = async (id) => {
   // this function only retrieve id and ids of child categories and return by spreating with "," 1,2,3...
   let ids = id + ",";

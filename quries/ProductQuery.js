@@ -62,8 +62,28 @@ export const getProductDataByCategory = async (
     throw new CustomError("Database error", 500);
   }
 };
-export const create = async (productData, unitData) => {
+export const create = async (data) => {
   let transaction = await db.transaction();
+  let sale_prices = {
+    sale_price: 0,
+    sale_price2: 0,
+    sale_price3: 0,
+    sale_price4: 0,
+  };
+  let productData = {
+    ...data,
+    ...sale_prices,
+    purchase_price: data.purchaseprice,
+    category_id: data.category.id,
+    availability: data.status.value,
+  };
+  let unitData = {
+    ...sale_prices,
+    ...data,
+    purchase_price: data.purchaseprice,
+    unit_qty: 1,
+    unit_type: 1,
+  };
   try {
     let sql = `insert into products (name,code,purchase_price,sale_price,sale_price2,sale_price3
               ,sale_price4,category_id,availability) values ($name,$code,$purchase_price,$sale_price
@@ -261,10 +281,10 @@ export const getProductUnitDataForBalance = async (product_id) => {
       bind: { product_id },
     });
     return result;
-  } 
-    let sql = `select * from productunitviews order by product_id,unit_type`;
-    let result = await db.query(sql,{
-      type:QueryTypes.SELECT,
-    });
-    return result;
+  }
+  let sql = `select * from productunitviews order by product_id,unit_type`;
+  let result = await db.query(sql, {
+    type: QueryTypes.SELECT,
+  });
+  return result;
 };
