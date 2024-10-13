@@ -5,6 +5,7 @@ import LoginRoute from "./routes/LoginRoute.js";
 import ProductRoute from "./routes/ProductRoute.js";
 import PurchaseRoute from "./routes/PurchaseRoute.js";
 import StockgroupRoute from "./routes/StockgroupRoute.js";
+import MerchantRoute from "./routes/MerchantRoute.js"
 import dayjs from "dayjs";
 
 const app = express();
@@ -41,6 +42,7 @@ app.use("/login", LoginRoute);
 app.use("/products", ProductRoute);
 app.use("/purchases", PurchaseRoute);
 app.use("/stockgroups", StockgroupRoute);
+app.use("/merchants", MerchantRoute);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

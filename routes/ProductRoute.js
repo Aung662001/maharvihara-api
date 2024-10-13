@@ -10,8 +10,9 @@ import {
   getProductDataByName,
   getProductUnitData,
   remove,
+  updateProduct,
 } from "../quries/ProductQuery.js";
-import { getCategoryName } from "../quries/CategoryQuery.js";
+import { getCategoryName } from "../quries/StockgroupQuery.js";
 import { CustomError ,ErrorResponse} from "../helper/ErrorResponse.js";
 const router = express.Router();
 
@@ -151,3 +152,16 @@ router.post("/createPackageSizePair", verifyJwtToken, async (req, res) => {
     ErrorResponse(err, req, res);
   }
 });
+router.patch("/updateProduct",async(req,res)=>{
+  try {
+    let data = req.body;
+    let product_id = req.query.id;
+    let result = await updateProduct(product_id,data);
+    res
+      .status(200)
+      .json({ success: true, message: "Updated Successfully." });
+  } catch (err) {
+     console.log(err);
+     ErrorResponse(err, req, res);
+   }
+})

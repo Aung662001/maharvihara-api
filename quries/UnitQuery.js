@@ -1,7 +1,6 @@
 import { QueryTypes } from "sequelize";
 import db from "../database/db.js";
 
-
 export const getUnitData = async () => {
   try {
     let sql = "select * from units";
@@ -46,16 +45,35 @@ export const update = async (data) => {
 };
 
 export const deleteUnit = async (id) => {
-    try{
-        let sql = `delete from units where id = ${id}`
-        let deleted = await db.query(sql,{
-            type:QueryTypes.DELETE,
-            bind:{id:id}
-        })
-        console.log(deleted)
-        return deleted;
-    }catch(error){
-        console.log(error)
-        throw new Error("Database Error")
+  try {
+    let sql = `delete from units where id = ${id}`;
+    let deleted = await db.query(sql, {
+      type: QueryTypes.DELETE,
+      bind: { id: id },
+    });
+    console.log(deleted);
+    return deleted;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Error");
+  }
+};
+export const getDefaultUnit = async () => {
+  try {
+    let sql = `select * from units where short_name like '%Pcs%' or short_name like '%pcs%' limit 1`;
+    let result = await db.query(sql,{
+      type:QueryTypes.SELECT
+    });
+    if(result[0]){
+      return result[0];
     }
-}
+    sql = `select * from units limit 1`;
+    result = await db.query(sql,{
+      type:QueryTypes.SELECT
+    });
+    if(result[0]) return result[0];
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Error");
+  }
+};

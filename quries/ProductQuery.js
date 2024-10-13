@@ -2,7 +2,8 @@ import { QueryTypes } from "sequelize";
 import db from "../database/db.js";
 import { Delete } from "../helper/QueryHelper.js";
 import { CustomError } from "../helper/ErrorResponse.js";
-import { getChildCategories } from "./CategoryQuery.js";
+import { getChildCategories } from "./StockgroupQuery.js";
+import { getDefaultUnit } from "./UnitQuery.js";
 
 export const getProductDataByCategory = async (
   category_id,
@@ -64,6 +65,7 @@ export const getProductDataByCategory = async (
 };
 export const create = async (data) => {
   let transaction = await db.transaction();
+  let default_unit = await getDefaultUnit();
   let sale_prices = {
     sale_price: 0,
     sale_price2: 0,
@@ -74,12 +76,13 @@ export const create = async (data) => {
     ...data,
     ...sale_prices,
     purchase_price: data.purchaseprice,
-    category_id: data.category.id,
+    category_id: (data.category && data.category.id) ? data.category.id : 0,
     availability: data.status.value,
   };
   let unitData = {
     ...sale_prices,
     ...data,
+    unit_id: default_unit.id,
     purchase_price: data.purchaseprice,
     unit_qty: 1,
     unit_type: 1,
@@ -94,8 +97,8 @@ export const create = async (data) => {
       transaction,
     });
     let product_id = result[0];
-    sql = `insert into product_units (product_id,unit_qty,unit_type,purchase_price,sale_price,
-            sale_price2,sale_price3,sale_price4) values ($product_id,$unit_qty,$unit_type,$purchase_price
+    sql = `insert into product_units (product_id,unit_qty,unit_id,unit_type,purchase_price,sale_price,
+            sale_price2,sale_price3,sale_price4) values ($product_id,$unit_qty,$unit_id,$unit_type,$purchase_price
             ,$sale_price,$sale_price2,$sale_price3,$sale_price4)`;
     result = await db.query(sql, {
       type: QueryTypes.INSERT,
@@ -287,4 +290,41 @@ export const getProductUnitDataForBalance = async (product_id) => {
     type: QueryTypes.SELECT,
   });
   return result;
+};
+
+export const updateProduct = async (product_id, data) => {
+  if (product_id) {
+    let transaction = await db.transaction();
+    let sale_prices = {
+      sale_price: 0,
+      sale_price2: 0,
+      sale_price3: 0,
+      sale_price4: 0,
+      id: product_id,
+    };
+    let productData = {
+      ...data,
+      ...sale_prices,
+      purchase_price: data.purchaseprice,
+      category_id: (data.category && data.category.id) ? data.category.id : 0,
+      availability: data.status.value,
+    };
+
+    try {
+      let sql = `update products set name=$name,code=$code,purchase_price=$purchase_price,sale_price=$sale_price,
+                sale_price2=$sale_price2,sale_price3=$sale_price3
+                ,sale_price4=$sale_price4,category_id=$category_id,availability=$availability where id=$id`;
+      let result = await db.query(sql, {
+        type: QueryTypes.UPDATE,
+        bind: productData,
+        transaction,
+      });
+      await transaction.commit();
+      return result;
+    } catch (error) {
+      console.log(error);
+      await transaction.rollback();
+      throw new CustomError("Database error", 500);
+    }
+  }
 };

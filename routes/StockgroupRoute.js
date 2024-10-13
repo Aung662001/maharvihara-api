@@ -1,7 +1,7 @@
 import express from "express";
 import dayjs from "dayjs";
 import verifyJwtToken from "../auth/VerifyJwt.js";
-import { getAllCategories, getCategoryName, getChildCategories} from "../quries/CategoryQuery.js";
+import { create, getAllCategories, getCategoryName, getChildCategories, remove, update} from "../quries/StockgroupQuery.js";
 import { CustomError ,ErrorResponse} from "../helper/ErrorResponse.js";
 const router = express.Router();
 
@@ -50,8 +50,40 @@ router.get("/fetchStockGroupNames", async (req, res) => {
       res.status(200).json({ categories });
     } catch (err) {
       console.log(err);
-      responseError(err, req, res);
+      ErrorResponse(err, req, res);
     }
   });
+
+  router.post("/crateStockGroup",async (req,res)=>{
+    try {
+      let data = req.body;
+      let result = await create(data);
+      res.status(200).json({ message:"Successfully Created." });
+    } catch (err) {
+      console.log(err);
+      ErrorResponse(err, req, res);
+    }
+  })
+  router.patch("/updateStockGroup",async (req,res)=>{
+    try {
+      let data = req.body;
+      let result = await update(data);
+      res.status(200).json({ message:"Successfully Updated." });
+    } catch (err) {
+      console.log(err);
+      ErrorResponse(err, req, res);
+    }
+  }); 
+  router.delete("/deleteStockGroup",async (req,res)=>{
+    try {
+      // let data = req.body;
+      let id = req.query.id;
+      let result = await remove(id);
+      res.status(200).json({ message:"Successfully Deleted." });
+    } catch (err) {
+      console.log(err);
+      ErrorResponse(err, req, res);
+    }
+  })
 
 export default router;
