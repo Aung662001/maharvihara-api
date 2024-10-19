@@ -55,6 +55,7 @@ export const getPurchaseData = async (filter, user, id = null) => {
 			LEFT JOIN stores s ON his.stock_location_id=s.id
 			LEFT JOIN accounts a ON his.cashbook_id=a.id
 			${query_filter} ORDER BY his.voucher_date desc,his.voucher_no desc `;
+      console.log(sql)
   let result = await db.query(sql, { type: QueryTypes.SELECT });
   return result;
 };

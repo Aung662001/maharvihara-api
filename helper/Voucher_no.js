@@ -57,7 +57,7 @@ export const getAdmisionNo = async () => {
 };
 export const getVoucherNo = async (type, user_id) => {
   try{
-    type = type.toUpperCase();
+    type = type.toUpperCase(); 
   let sql = "";
   let user_short_name = await fexecsql(`SELECT firstname AS return1 
                                 FROM users WHERE id=${user_id}`);

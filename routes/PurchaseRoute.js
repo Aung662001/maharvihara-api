@@ -1,12 +1,12 @@
 import express, { response } from "express";
 const router = express.Router();
+import { ErrorResponse } from "../helper/ErrorResponse.js";
+import { fexecsql } from "../helper/QueryHelper.js";
 import {
   getAccountData,
   getCashBankAccountData,
 } from "../quries/AccountQuery.js";
-import { ErrorResponse } from "../helper/ErrorResponse.js";
 import verifyJwtToken from "../auth/VerifyJwt.js";
-import { fexecsql } from "../helper/QueryHelper.js";
 import { getMerchantDataByBranch } from "../quries/MerchantQuery.js";
 import { getStoreData } from "../quries/StoreQuery.js";
 import { getPayType } from "../quries/SystemQuery.js";
@@ -60,6 +60,10 @@ router.get("/fetchNewPurchaseVoucherData", verifyJwtToken, async (req, res) => {
 router.get("/fetchPurchaseData", verifyJwtToken, async (req, res) => {
   try {
     let filter = req.session.filter;
+    if(!filter){
+      res.status(419).json({message:"Session expired. Please login again."});
+      return;
+    }
     let user = req.session.user;
     let data = await getPurchaseData(filter, user);
     res.status(200).json({ vouchers: data });
