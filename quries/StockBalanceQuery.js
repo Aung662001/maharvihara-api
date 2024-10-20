@@ -14,18 +14,16 @@ import {
 import dayjs from "dayjs";
 export const getStockBalancesData = async (user, filter) => {
   try {
+    console.log(filter)
     let filterstring = "";
     let branch_id = user.branch_id;
     let user_type = user.user_type;
 
-    let category_id = filter.category ? filter.category.id : 0;
-    let stock_location_id = filter.stock_location
-      ? filter.stock_location.id
-      : 0;
     let brand_id = filter.brand ? filter.brand.id : 0;
     let stock_name = filter.stock_name ? filter.stock_name : "";
     let filter_branch_id = filter.branch ? filter.branch.id : 0;
-
+    let category_id = (filter.category && filter.category) ? filter.category.id : 0;
+    let stock_location_id = (filter.stock_location && filter.stock_location.id) ? filter.stock_location.id : 0;
     if (brand_id) {
       filterstring += ` AND his.product_id in (SELECT id FROM products WHERE brand_id=${brand_id}) `;
     }
@@ -181,11 +179,12 @@ export const getStockBalance = async (user, filter) => {
   let branch_id = user.branch_id;
   let user_type = user.user_type;
 
-  let category_id = filter.category ? filter.category.id : 0;
-  let stock_location_id = filter.stock_location ? filter.stock_location.id : 0;
+  let category_id = (filter.category && filter.category) ? filter.category.id : 0;
+  let stock_location_id = (filter.stock_location && filter.stock_location.id) ? filter.stock_location.id : 0;
   let stock_name = filter.stock_name ? filter.short_name : "";
 
   let filterstring = "";
+
   if (category_id) {
     filterstring += ` AND his.product_id in (SELECT id from products WHERE category_id=${category_id}) `;
   } else {
@@ -275,11 +274,11 @@ export const getStockLedger = async (user, filter) => {
   let user_type = user.user_type;
   let user_id = user.user_id;
 
-  let brand_id = filter.brand ? filter.brand.id : 0;
-  let category_id = filter.category ? filter.category.id : 0;
-  let stock_location_id = filter.stock_location ? filter.stock_location.id : 0;
-  let stock_name = filter.stock_name ? filter.short_name : "";
-  let filter_branch_id = filter.branch ? filter.branch.id : 0;
+  let brand_id = (filter.brand && filter.brand) ? filter.brand.id : 0;
+  let category_id = (filter.category && filter.category.id) ? filter.category.id : 0;
+  let stock_location_id = (filter.stock_location && filter.stock_location)  ? filter.stock_location.id : 0;
+  let stock_name = filter.stock_name ? filter.stock_name : "";
+  let filter_branch_id = (filter.branch && filter.branch) ? filter.branch.id : 0;
 
   let filterstring = "";
   let transferfilter = "";
@@ -291,7 +290,7 @@ export const getStockLedger = async (user, filter) => {
     transferfilter += ` AND his.product_id in (SELECT id from products WHERE brand_id=${brand_id}) `;
   }
   if (category_id != 0 && category_id != -1) {
-    let category_ids = await getChildCategories($category_id);
+    let category_ids = await getChildCategories(category_id);
     filterstring += ` AND his.product_id in (SELECT id from products WHERE category_id in (${category_ids})) `;
     transferfilter += ` AND his.product_id in (SELECT id from products WHERE category_id in (${category_ids})) `;
   } else {

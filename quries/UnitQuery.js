@@ -14,13 +14,13 @@ export const getUnitData = async () => {
   }
 };
 
-export const create = async (data) => {
+export const addUnit = async (data) => {
   try {
     let sql =
       "insert into units (short_name,name,created_date) values ($short_name,$name,$created_date)";
     let create = await db.query(sql, {
       type: QueryTypes.INSERT,
-      bind: data,
+      bind: {...data,created_date:Date.now()},
     });
     return create;
   } catch (err) {
@@ -29,13 +29,13 @@ export const create = async (data) => {
   }
 };
 
-export const update = async (data) => {
+export const updateUnit = async (data) => {
   try {
     let sql =
       "update units set short_name=$short_name,name=$name,modified_date=$modified_date where id=$id";
     let update = await db.query(sql, {
       type: QueryTypes.UPDATE,
-      bind: data,
+      bind: {...data,modified_date:Date.now()},
     });
     return update;
   } catch (err) {

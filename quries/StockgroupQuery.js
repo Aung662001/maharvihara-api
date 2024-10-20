@@ -20,6 +20,7 @@ export const getCategoryName = async (parent_id) => {
     });
     return categories;
   } catch (error) {
+    console.log(error)
     throw new Error("Database Error");
   }
 };
