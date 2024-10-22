@@ -11,6 +11,7 @@ import AdjustmentRoute from "./routes/AdjustmentRoute.js";
 import StockBalanceRoute from "./routes/StockBalanceRoute.js";
 import StockLedgerRoute from "./routes/StockLedgerRoute.js";
 import UnitRoute from "./routes/UnitRoute.js";
+import FilterRoute from "./routes/FilterRoute.js"
 import dayjs from "dayjs";
 
 const app = express();
@@ -37,34 +38,7 @@ app.get("/test", (req, res) => {
   res.status(200).json({ success: true, message: "Sverver reached." });
 });
 
-app.post("/setfilters", async (req, res) => {
-  let data = req.body;
-  let today = dayjs(new Date()).format("YYYY-MM-DD");
-  let filterdata = { fromdate: today, todate: today };
-  if (data.category && data.category.id) {
-    filterdata.category = data.category;
-  }
-  if (data.brand && data.brand.id) {
-    filterdata.brand = data.brand;
-  }
-  if (data.stock_location && data.stock_location.id) {
-    filterdata.stock_location = data.stock_location;
-  }
-  if (data.branch && data.branch.id) {
-    filterdata.branch = data.branch;
-  }
-  if (data.fromdate) {
-    filterdata.fromdate = data.fromdate;
-  }
-  if (data.todate) {
-    filterdata.todate = data.todate;
-  }
-  if (data.stock_name) {
-    filterdata.stock_name = data.stock_name;
-  }
-  req.session.filter = filterdata;
-  res.sendStatus(200);
-});
+app.use("/filters",FilterRoute);
 
 app.use("/login", LoginRoute);
 app.use("/products", ProductRoute);

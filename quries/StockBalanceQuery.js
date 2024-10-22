@@ -14,7 +14,6 @@ import {
 import dayjs from "dayjs";
 export const getStockBalancesData = async (user, filter) => {
   try {
-    console.log(filter)
     let filterstring = "";
     let branch_id = user.branch_id;
     let user_type = user.user_type;
@@ -28,7 +27,7 @@ export const getStockBalancesData = async (user, filter) => {
       filterstring += ` AND his.product_id in (SELECT id FROM products WHERE brand_id=${brand_id}) `;
     }
     if (category_id != 0 && category_id != -1) {
-      let category_ids = getChildCategories(category_id);
+      let category_ids =await getChildCategories(category_id);
       filterstring += ` AND his.product_id in (SELECT id from products WHERE category_id in (${category_ids})) `;
     } else {
       if (user_type == 2) {
@@ -86,7 +85,6 @@ export const getStockBalancesData = async (user, filter) => {
     return result;
   } catch (error) {
     console.log(error);
-    transaction && (await transaction.rollback());
     throw new CustomError("Database error", 500);
   }
 };
@@ -414,7 +412,7 @@ export const getStockLedgerByDate = async (user,filter) => {
     transferfilter += ` AND his.product_id in (SELECT id from products WHERE brand_id=${brand_id}) `;
   }
   if (category_id != 0 && category_id != -1) {
-    let category_ids = await getChildCategories($category_id);
+    let category_ids = await getChildCategories(category_id);
     filterstring += ` AND his.product_id in (SELECT id from products WHERE category_id in (${category_ids})) `;
     transferfilter += ` AND his.product_id in (SELECT id from products WHERE category_id in (${category_ids})) `;
   } else {

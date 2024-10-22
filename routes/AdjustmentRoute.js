@@ -13,7 +13,7 @@ import {
   updateMerchant,
 } from "../quries/MerchantQuery.js";
 import { getActiveStore, getStoreData } from "../quries/StoreQuery.js";
-import { createNewAdjustmentVoucher, getAdjustmentData, getAdjustmentItemData, getAdjustmentItemUnitData, getAdjustmentTypes, updateAdjustmentVoucher } from "../quries/AdjustmentQuery.js";
+import { createNewAdjustmentVoucher, getAdjustmentData, getAdjustmentItemData, getAdjustmentItemUnitData, getAdjustmentTypes, removeAdjustmentVoucher, updateAdjustmentVoucher } from "../quries/AdjustmentQuery.js";
 import verifyJwtToken from "../auth/VerifyJwt.js";
 const router = express.Router();
 
@@ -89,5 +89,15 @@ router.post("/updateStockUseVoucher",verifyJwtToken, async (req, res) => {
       ErrorResponse(err, req, res);
     }
   });
-
+router.delete("/deleteAdjustmentVoucher",verifyJwtToken, async (req,res)=>{
+  try {
+    let id = req.query.id;
+    let deleted = await removeAdjustmentVoucher(id);
+    if (deleted) {
+      res.status(200).json({ message: "Voucher deleted successfully" });
+    }
+  } catch (err) {
+    ErrorResponse(err, req, res);
+  }
+})
 export default router;

@@ -633,7 +633,6 @@ export const remove = async (id) => {
     await transaction.commit();
     return true;
   } catch (error) {
-    console.log(error);
     transaction && (await transaction.rollback());
     throw new CustomError("Database error", 500);
   }

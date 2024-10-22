@@ -117,7 +117,7 @@ router.post("/update", verifyJwtToken, async (req, res) => {
     ErrorResponse(err, req, res);
   }
 });
-router.get("/delete", async (req, res) => {
+router.delete("/deletePurchaseVoucher", async (req, res) => {
   try {
     let id = req.query.id;
     let deleted = await remove(id);

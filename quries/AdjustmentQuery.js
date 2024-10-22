@@ -3,6 +3,7 @@ import db from "../database/db.js";
 import { CustomError } from "../helper/ErrorResponse.js";
 import { getVoucherNo } from "../helper/Voucher_no.js";
 import dayjs from "dayjs";
+import { DeleteQuery } from "./HelperQuery.js";
 
 export const getAdjustmentTypes = async () => {
   try {
@@ -259,3 +260,15 @@ export const getAdjustmentItemUnitData = async (id) => {
     throw new CustomError("Database Error", 500);
   }
 };
+export const removeAdjustmentVoucher = async (id) =>{
+  try{
+    let sql = `delete from adjustments where id = ${id}`;
+    let deleted = await DeleteQuery(sql);
+    sql = `delete from adjustment_details where adjustment_id=${id}`;
+    deleted = await DeleteQuery(sql);
+    return deleted;
+  }catch (err) {
+    console.log(err);
+    throw new CustomError("Database Error", 500);
+  }
+}

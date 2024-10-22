@@ -2,7 +2,7 @@ import express from "express"
 import verifyJwtToken from "../auth/VerifyJwt.js";
 import { fexecsql } from "../helper/QueryHelper.js";
 import { ErrorResponse } from "../helper/ErrorResponse.js";
-import { addUnit, deleteUnit, getUnitData, updateUnit } from "../quries/UnitQuery.js";
+import { addUnit, createUnitPair, deleteUnit, getProductUnitData, getUnitData, updateUnit } from "../quries/UnitQuery.js";
 const router = express.Router();
 
 router.post("/addNewUnit", async (req, res) => {
@@ -53,4 +53,30 @@ router.get("/fetchAllUnits",async (req,res)=>{
         ErrorResponse(err, req, res);
       } 
 });
+router.get("/fetchProductUnitData",async (req,res)=>{
+  try{
+    let id  = req.query.id;
+    if(!id){
+      throw new Error("No Product Found");
+    }
+    let result = await getProductUnitData(id);
+    res.status(200).json({units:result})
+  }catch(error){
+    ErrorResponse(error,req,res)
+  }
+});
+router.post("/createUnitPair",async (req,res)=>{
+  try{
+    let data  = req.body;
+    let id  = req.query.id;
+    if(!id) throw new Error("Please select product to pair.")
+    if(!data){
+      throw new Error("Invalid data.");
+    }
+    let result = await createUnitPair(data,id)
+    res.status(200).json({message:"Successfully created unit pair."})
+  }catch(error){
+    ErrorResponse(error,req,res)
+  }
+})
 export default router;
