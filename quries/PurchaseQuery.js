@@ -4,6 +4,7 @@ import { getVoucherNo } from "../helper/Voucher_no.js";
 import { fexecsql } from "../helper/QueryHelper.js";
 import { CustomError } from "../helper/ErrorResponse.js";
 export const getPurchaseData = async (filter, user, id = null) => {
+  console.log(user)
   if (id) {
     let sql = `SELECT * FROM purchases WHERE id = ${id}`;
     let result = await db.query(sql, { type: QueryTypes.SELECT });
@@ -621,7 +622,7 @@ let updatePurchaseDetails = async (data, transaction, purchase_id, index) => {
 export const remove = async (id) => {
   let transaction = await db.transaction();
   try {
-    let sql = `delete from purchase where id = $id`;
+    let sql = `delete from purchases where id = $id`;
     await makeRemove(sql, id, transaction);
 
     sql = `delete from purchase_details where purchase_id = $id`;
@@ -633,6 +634,7 @@ export const remove = async (id) => {
     await transaction.commit();
     return true;
   } catch (error) {
+    console.log(error)
     transaction && (await transaction.rollback());
     throw new CustomError("Database error", 500);
   }

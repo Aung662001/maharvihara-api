@@ -25,7 +25,7 @@ export const getAdjustmentData = async (filter, user, id = null) => {
     result = await db.query(sql, {
       type: QueryTypes.SELECT,
     });
-    return result[0]
+    return result[0];
   } else {
     let curdate = dayjs().format("YYYY-MM-DD");
     let fromdate = filter.fromdate ? filter.fromdate : curdate;
@@ -71,9 +71,9 @@ export const createNewAdjustmentVoucher = async (user, data) => {
     } else {
       voucher_no = await getVoucherNo("ADJ", user.user_id);
     }
-    let sql = `insert into adjustments (voucher_no,voucher_date,stock_location_id,remark,
+    let sql = `insert into adjustments (voucher_no,voucher_date,total_qty,stock_location_id,remark,
         total_increase_amount,total_decrease_amount,currency_id,exchange_rate,user_id,
-        created_date,modified_date) values ($voucher_no,$voucher_date,$stock_location_id,$remark,
+        created_date,modified_date) values ($voucher_no,$voucher_date,$total_qty,$stock_location_id,$remark,
         $total_increase_amount,$total_decrease_amount,$currency_id,$exchange_rate,$user_id,
         $created_date,$modified_date)`;
     let result = await db.query(sql, {
@@ -81,7 +81,7 @@ export const createNewAdjustmentVoucher = async (user, data) => {
       bind: {
         voucher_no,
         voucher_date: data.date,
-        total_qty:data.totalqty,
+        total_qty: data.totalqty,
         stock_location_id: data.stocklocation ? data.stocklocation.id : 0,
         remark: data.remark,
         total_increase_amount: data.total_increase_amount,
@@ -175,7 +175,7 @@ export const updateAdjustmentVoucher = async (user, data, id) => {
         voucher_date: data.date,
         stock_location_id: data.stocklocation ? data.stocklocation.id : 1,
         remark: data.remark,
-        total_qty:data.totalqty,
+        total_qty: data.totalqty,
         total_increase_amount: data.total_increase_amount,
         total_decrease_amount: data.total_decrease_amount,
         currency_id: data.currency ? data.currency.id : 1,
@@ -260,15 +260,15 @@ export const getAdjustmentItemUnitData = async (id) => {
     throw new CustomError("Database Error", 500);
   }
 };
-export const removeAdjustmentVoucher = async (id) =>{
-  try{
+export const removeAdjustmentVoucher = async (id) => {
+  try {
     let sql = `delete from adjustments where id = ${id}`;
     let deleted = await DeleteQuery(sql);
     sql = `delete from adjustment_details where adjustment_id=${id}`;
     deleted = await DeleteQuery(sql);
     return deleted;
-  }catch (err) {
+  } catch (err) {
     console.log(err);
     throw new CustomError("Database Error", 500);
   }
-}
+};

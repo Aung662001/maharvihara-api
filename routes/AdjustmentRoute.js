@@ -92,10 +92,9 @@ router.post("/updateStockUseVoucher",verifyJwtToken, async (req, res) => {
 router.delete("/deleteAdjustmentVoucher",verifyJwtToken, async (req,res)=>{
   try {
     let id = req.query.id;
+    console.log(id,"to delete adj id")
     let deleted = await removeAdjustmentVoucher(id);
-    if (deleted) {
       res.status(200).json({ message: "Voucher deleted successfully" });
-    }
   } catch (err) {
     ErrorResponse(err, req, res);
   }

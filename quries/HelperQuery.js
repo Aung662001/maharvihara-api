@@ -1,9 +1,10 @@
 import { QueryTypes } from "sequelize";
 import db from "../database/db.js";
-export const DeleteQuery = (sql) => {
-  return db.query(sql, {
+export const DeleteQuery = async(sql) => {
+  let deleted = await db.query(sql, {
     type: QueryTypes.DELETE,
   });
+  return deleted;
 };
 export const InsertQuery = async (tb_name, data) => {
   let keys = Object.keys(data);

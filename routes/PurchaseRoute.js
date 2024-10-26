@@ -64,7 +64,7 @@ router.get("/fetchPurchaseData", verifyJwtToken, async (req, res) => {
       res.status(419).json({message:"Session expired. Please login again."});
       return;
     }
-    let user = req.session.user;
+    let user = req.user;
     let data = await getPurchaseData(filter, user);
     res.status(200).json({ vouchers: data });
   } catch (err) {
@@ -121,9 +121,7 @@ router.delete("/deletePurchaseVoucher", async (req, res) => {
   try {
     let id = req.query.id;
     let deleted = await remove(id);
-    if (deleted) {
       res.status(200).json({ message: "Voucher deleted successfully" });
-    }
   } catch (err) {
     ErrorResponse(err, req, res);
   }

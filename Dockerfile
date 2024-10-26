@@ -1,0 +1,32 @@
+
+
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Dockerfile reference guide at
+# https://docs.docker.com/go/dockerfile-reference/
+
+# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
+
+ARG NODE_VERSION=18.20.3
+
+FROM node:${NODE_VERSION}-slim
+
+# Use production node environment by default.
+# ENV NODE_ENV production
+
+# FROM node:current
+
+# ENV NODE_VERSION=18.20.3
+
+WORKDIR /app
+
+
+COPY . .
+RUN rm -rf node_modules/
+RUN npm install
+
+# Expose the port that the application listens on.
+EXPOSE 8800
+
+# Run the application.
+CMD npm start
+
