@@ -4,7 +4,7 @@ import { CustomError } from '../helper/ErrorResponse.js';
 let db = "";
 try{
    db = new Sequelize('maharvihara', 'dawhlaing', 'm0ni$oftsvR', {
-    host: 'localhost',
+    host: 'mysql.dawhlaingandsons.com',
     dialect: 'mysql',
     logging: false,
     pool: {
