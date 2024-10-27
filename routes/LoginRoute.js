@@ -13,8 +13,8 @@ router.get("/", async (req, res) => {
   try {
     const { email, password } = req.query;
     if (email && password) {
-      let sql = `select * from users his left join user_group ug on ug.user_id = his.id 
-          left join groups g on g.id = ug.group_id where his.email=$email`;
+      let sql = "select * from users his left join user_group ug on ug.user_id = his.id "+ 
+          "left join `groups` g on g.id = ug.group_id where his.email=$email";
 
       let user = await db.query(sql, {
         bind: { email: email },
