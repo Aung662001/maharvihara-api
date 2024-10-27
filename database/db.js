@@ -4,7 +4,7 @@ import { CustomError } from '../helper/ErrorResponse.js';
 let db = "";
 try{
    db = new Sequelize('maharvihara', 'dawhlaing', 'm0ni$oftsvR', {
-    host: 'mysql.dawhlaingandsons.com',
+    host: 'localhost',
     dialect: 'mysql',
     logging: false,
     pool: {
@@ -17,9 +17,6 @@ try{
 }catch(error){
     console.log(error)
   throw new CustomError("Database connection error: ",500)
-}finally{
-  
 }
-
 
 export default db;
