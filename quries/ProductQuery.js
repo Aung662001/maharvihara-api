@@ -76,13 +76,14 @@ export const create = async (data) => {
     ...data,
     ...sale_prices,
     purchase_price: data.purchaseprice,
-    category_id: (data.category && data.category.id) ? data.category.id : 0,
+    category_id: data.category && data.category.id ? data.category.id : 0,
     availability: data.status.value,
   };
   let unitData = {
     ...sale_prices,
     ...data,
     unit_id: default_unit.id,
+    smallest_unit_qty: 1,
     purchase_price: data.purchaseprice,
     unit_qty: 1,
     unit_type: 1,
@@ -97,15 +98,28 @@ export const create = async (data) => {
       transaction,
     });
     let product_id = result[0];
-    sql = `insert into product_units (product_id,unit_qty,unit_id,unit_type,purchase_price,sale_price,
-            sale_price2,sale_price3,sale_price4) values ($product_id,$unit_qty,$unit_id,$unit_type,$purchase_price
+    sql = `insert into product_units (product_id,unit_qty,unit_id,smallest_unit_qty,unit_type,purchase_price,sale_price,
+            sale_price2,sale_price3,sale_price4) values ($product_id,$unit_qty,$unit_id,$smallest_unit_qty,$unit_type,$purchase_price
             ,$sale_price,$sale_price2,$sale_price3,$sale_price4)`;
     result = await db.query(sql, {
       type: QueryTypes.INSERT,
       bind: { ...unitData, product_id },
       transaction,
     });
-    await updateSmallestUnitQty(product_id, transaction);
+    // sql = `UPDATE product_units SET smallest_unit_qty=1 WHERE product_id=${product_id}  AND unit_type= 1`;
+    // result = await db.query(sql, {
+    //   type: QueryTypes.UPDATE,
+    //   transaction,
+    // });
+    sql = `UPDATE products p JOIN product_units u ON p.id=u.product_id 
+      SET p.sale_price=u.sale_price,p.sale_price2=u.sale_price2,
+      p.sale_price3=u.sale_price3,p.sale_price4=u.sale_price4  
+      WHERE u.unit_type=1`;
+    result = await db.query(sql, {
+      type: QueryTypes.UPDATE,
+      transaction,
+    });
+    // await updateSmallestUnitQty(product_id, transaction);
     //set smallest unit qty and prices in product_units table
     await transaction.commit();
     return result;
@@ -132,31 +146,33 @@ let updateSmallestUnitQty = async (product_id, transaction) => {
   // let sql = `insert into product_units (product_id,unit_qty,unit_type,purchase_price,sale_price,sale_price2,sale_price3,sale_price4)
   //             values (
   //             $product_id,$unit_qty,$unit_type,$purchase_price,$sale_price,$sale_price2,$sale_price3,$sale_price4)`;
-   let sql = `SELECT * FROM product_units WHERE product_id=${product_id} ORDER BY unit_type DESC`;
+  let sql = `SELECT * FROM product_units WHERE product_id=${product_id} ORDER BY unit_type DESC`;
   let result = await db.query(sql, {
     type: QueryTypes.SELECT,
   });
   let smallestqty = 1;
   let tmpqty = 1;
-  result.forEach(async (item) => {
-    if (item.to_unit_qty != 0) {
-      tmpqty = item.to_unit_qty;
-    }
-    smallestqty = smallestqty * tmpqty;
-    let sql = `UPDATE product_units SET smallest_unit_qty=1 WHERE product_id=${product_id}  AND unit_type= 1`;
-    let result = await db.query(sql, {
-      type: QueryTypes.UPDATE,
-      transaction,
-    });
-    sql = `UPDATE products p JOIN product_units u ON p.id=u.product_id 
+  await Promise.all(
+    result.map(async (item) => {
+      if (item.to_unit_qty != 0) {
+        tmpqty = item.to_unit_qty;
+      }
+      smallestqty = smallestqty * tmpqty;
+      let sql = `UPDATE product_units SET smallest_unit_qty=1 WHERE product_id=${product_id}  AND unit_type= 1`;
+      let result = await db.query(sql, {
+        type: QueryTypes.UPDATE,
+        transaction,
+      });
+      sql = `UPDATE products p JOIN product_units u ON p.id=u.product_id 
 				SET p.sale_price=u.sale_price,p.sale_price2=u.sale_price2,
 				p.sale_price3=u.sale_price3,p.sale_price4=u.sale_price4  
 				WHERE u.unit_type=1`;
-    result = await db.query(sql, {
-      type: QueryTypes.UPDATE,
-      transaction,
-    });
-  });
+      result = await db.query(sql, {
+        type: QueryTypes.UPDATE,
+        transaction,
+      });
+    })
+  );
 };
 export const getProductDataByCode = async (code) => {
   try {
@@ -309,7 +325,7 @@ export const updateProduct = async (product_id, data) => {
       ...data,
       ...sale_prices,
       purchase_price: data.purchaseprice,
-      category_id: (data.category && data.category.id) ? data.category.id : 0,
+      category_id: data.category && data.category.id ? data.category.id : 0,
       availability: data.status.value,
     };
 
