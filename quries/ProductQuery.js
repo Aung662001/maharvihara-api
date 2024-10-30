@@ -97,7 +97,7 @@ export const create = async (data) => {
       transaction,
     });
     let product_id = result[0];
-    sql = `insert into product_units (product_id,unit_qty,unit_id,,unit_type,purchase_price,sale_price,
+    sql = `insert into product_units (product_id,unit_qty,unit_id,unit_type,purchase_price,sale_price,
             sale_price2,sale_price3,sale_price4) values ($product_id,$unit_qty,$unit_id,$unit_type,$purchase_price
             ,$sale_price,$sale_price2,$sale_price3,$sale_price4)`;
     result = await db.query(sql, {
