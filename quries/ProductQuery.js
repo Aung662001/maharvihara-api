@@ -129,7 +129,10 @@ export const remove = async (id) => {
   }
 };
 let updateSmallestUnitQty = async (product_id, transaction) => {
-  let sql = `SELECT * FROM product_units WHERE product_id=${product_id} ORDER BY unit_type DESC`;
+  // let sql = `insert into product_units (product_id,unit_qty,unit_type,purchase_price,sale_price,sale_price2,sale_price3,sale_price4)
+  //             values (
+  //             $product_id,$unit_qty,$unit_type,$purchase_price,$sale_price,$sale_price2,$sale_price3,$sale_price4)`;
+   let sql = `SELECT * FROM product_units WHERE product_id=${product_id} ORDER BY unit_type DESC`;
   let result = await db.query(sql, {
     type: QueryTypes.SELECT,
   });
@@ -137,7 +140,7 @@ let updateSmallestUnitQty = async (product_id, transaction) => {
   let tmpqty = 1;
   result.forEach(async (item) => {
     if (item.to_unit_qty != 0) {
-      tmpqty = item.to_unit_qty;
+      tmpqty = item.to_unit_qty?item.to_unit_qty:1;
     }
     smallestqty = smallestqty * tmpqty;
     let sql = `UPDATE product_units SET smallest_unit_qty=${smallestqty} WHERE product_id=${product_id}  AND unit_type= ${item.unit_type}`;
