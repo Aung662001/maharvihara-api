@@ -83,7 +83,6 @@ export const create = async (data) => {
     ...sale_prices,
     ...data,
     unit_id: default_unit.id,
-    to_unit_qty:1,
     purchase_price: data.purchaseprice,
     unit_qty: 1,
     unit_type: 1,
@@ -98,8 +97,8 @@ export const create = async (data) => {
       transaction,
     });
     let product_id = result[0];
-    sql = `insert into product_units (product_id,unit_qty,unit_id,to_unit_qty,unit_type,purchase_price,sale_price,
-            sale_price2,sale_price3,sale_price4) values ($product_id,$unit_qty,$unit_id,$to_unit_qty,$unit_type,$purchase_price
+    sql = `insert into product_units (product_id,unit_qty,unit_id,,unit_type,purchase_price,sale_price,
+            sale_price2,sale_price3,sale_price4) values ($product_id,$unit_qty,$unit_id,$unit_type,$purchase_price
             ,$sale_price,$sale_price2,$sale_price3,$sale_price4)`;
     result = await db.query(sql, {
       type: QueryTypes.INSERT,
@@ -144,7 +143,7 @@ let updateSmallestUnitQty = async (product_id, transaction) => {
       tmpqty = item.to_unit_qty;
     }
     smallestqty = smallestqty * tmpqty;
-    let sql = `UPDATE product_units SET smallest_unit_qty=${smallestqty?smallestqty:1} WHERE product_id=${product_id}  AND unit_type= ${item.unit_type}`;
+    let sql = `UPDATE product_units SET smallest_unit_qty=1 WHERE product_id=${product_id}  AND unit_type= 1`;
     let result = await db.query(sql, {
       type: QueryTypes.UPDATE,
       transaction,
