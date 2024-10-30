@@ -3,10 +3,10 @@ import { CustomError } from '../helper/ErrorResponse.js';
 
 let db = "";
 try{
-  //  db = new Sequelize('maharvihara', 'dawhlaing', 'm0ni$oftsvR', {
-  //   host: 'mysql.dawhlaingandsons.com',
-  db = new Sequelize('maharvihara', 'root', 'password', {
-    host: 'localhost',
+   db = new Sequelize('maharvihara', 'dawhlaing', 'm0ni$oftsvR', {
+    host: 'mysql.dawhlaingandsons.com',
+  // db = new Sequelize('maharvihara', 'root', 'password', {
+  //   host: 'localhost',
     dialect: 'mysql',
     logging: false,
     pool: {
